@@ -1,0 +1,38 @@
+from base64 import b64encode, b64decode
+
+from noise.connection import NoiseConnection
+import typer
+
+
+def main(responder: bool = False):
+    proto = NoiseConnection.from_name(b"Noise_NN_25519_ChaChaPoly_SHA256")
+    if responder:
+        proto.set_as_responder()
+    else:
+        proto.set_as_initiator()
+
+    proto.start_handshake()
+    if responder:
+        proto.read_message(b64decode(input("Handshake: ").encode()))
+        print("Handshake Response: " + b64encode(proto.write_message()).decode())
+    else:
+        print("Handshake: " + b64encode(proto.write_message()).decode())
+        proto.read_message(b64decode(input("Handshake Response: ").encode()))
+
+    while True:
+        if responder:
+            encrypted = input("Decrypt: ").strip()
+            print(proto.decrypt(b64decode(encrypted.encode())).decode())
+
+            plaintext = input("Encrypt: ").strip()
+            print(b64encode(proto.encrypt(plaintext.encode())).decode())
+        else:
+            plaintext = input("Encrypt: ").strip()
+            print(b64encode(proto.encrypt(plaintext.encode())).decode())
+
+            encrypted = input("Decrypt: ").strip()
+            print(proto.decrypt(b64decode(encrypted.encode())).decode())
+
+
+if __name__ == "__main__":
+    typer.run(main)
