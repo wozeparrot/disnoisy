@@ -35,6 +35,17 @@
               typer
             '';
           };
+          packages.disnoisy = mach-nix.buildPythonApplication {
+            pname = "disnoisy";
+            version = "0.1.0";
+            src = ./.;
+            requirements = ''
+              noiseprotocol
+              websocket-server
+              typer
+            '';
+          };
+          defaultPackage = packages.disnoisy;
         }
       );
 }
